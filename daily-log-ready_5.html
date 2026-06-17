@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Workload & Wellbeing Log</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f0f0ec;color:#1a1a1a;min-height:100vh;padding:1.5rem 1rem}
+  .page{max-width:600px;margin:0 auto}
+  h1{font-size:20px;font-weight:700;margin-bottom:4px}
+  .subtitle{font-size:13px;color:#666;margin-bottom:1.5rem;line-height:1.5}
+  .card{background:#fff;border-radius:8px;border:1px solid #e0ddd8;padding:16px;margin-bottom:12px}
+  .card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#888;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f0ede8}
+  .card-subtitle{font-size:12px;color:#aaa;font-weight:400;margin-left:6px;text-transform:none;letter-spacing:0}
+  .field{margin-bottom:12px}
+  .field:last-child{margin-bottom:0}
+  label{display:block;font-size:13px;font-weight:600;color:#444;margin-bottom:4px}
+  .hint{font-size:12px;color:#888;margin-bottom:4px;font-weight:400}
+  input[type=text],input[type=date],input[type=number],textarea{width:100%;font-size:15px;padding:10px 12px;border:1.5px solid #ddd;border-radius:6px;background:#fafaf8;color:#1a1a1a;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif}
+  input:focus,textarea:focus{outline:none;border-color:#1a1a1a;background:#fff}
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .assess-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #f5f3f0}
+  .assess-row:last-child{border-bottom:none;padding-bottom:0}
+  .assess-row:first-child{padding-top:0}
+  .assess-type{font-size:14px;font-weight:500;color:#1a1a1a}
+  .assess-type span{display:block;font-size:12px;color:#888;font-weight:400;margin-top:1px}
+  .assess-row input{padding:8px 10px;font-size:14px}
+  .assess-header{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:6px}
+  .assess-header span{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#aaa;text-align:center}
+  .assess-header span:first-child{text-align:left}
+  .break-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f3f0}
+  .break-row:last-child{border-bottom:none;padding-bottom:0}
+  .break-row:first-child{padding-top:0}
+  .bl{font-size:14px;font-weight:500;color:#1a1a1a}
+  .bs{font-size:12px;color:#888;margin-top:1px}
+  .togs{display:flex;gap:5px;flex-shrink:0;margin-left:10px}
+  .tog{padding:6px 14px;border:1.5px solid #ddd;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;background:#fff;color:#888;transition:all 0.12s;-webkit-tap-highlight-color:transparent}
+  .tog.yes.on{background:#e8f5e9;border-color:#2e7d32;color:#1b5e20}
+  .tog.no.on{background:#fce8e8;border-color:#c62828;color:#7f0000}
+  .tog.partial.on{background:#fff8e1;border-color:#f57f17;color:#7a4800}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .chip{padding:6px 12px;border:1.5px solid #ddd;border-radius:20px;font-size:13px;cursor:pointer;background:#fff;color:#666;transition:all 0.12s;-webkit-tap-highlight-color:transparent}
+  .chip.on{background:#fff8e1;border-color:#f57f17;color:#7a4800;font-weight:600}
+  .it-extra{display:none;margin-top:10px;padding:12px;background:#fafaf8;border:1px solid #e8e6e0;border-radius:6px}
+  .it-extra.show{display:block}
+  .stress-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .stress-lbl{font-size:12px;color:#888;min-width:30px}
+  .snums{display:flex;gap:6px}
+  .snum{width:42px;height:42px;border-radius:50%;border:1.5px solid #ddd;font-size:15px;font-weight:700;cursor:pointer;background:#fff;color:#888;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:all 0.12s}
+  .snum.on{color:#fff}
+  .s1.on{background:#2e7d32;border-color:#2e7d32}
+  .s2.on{background:#558b2f;border-color:#558b2f}
+  .s3.on{background:#f57f17;border-color:#f57f17}
+  .s4.on{background:#d84315;border-color:#d84315}
+  .s5.on{background:#c62828;border-color:#c62828}
+  .stress-word{font-size:13px;color:#888;min-width:80px}
+  .sym-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .sym{padding:10px;border:1.5px solid #e0ddd8;border-radius:6px;font-size:13px;color:#666;cursor:pointer;background:#fafaf8;-webkit-tap-highlight-color:transparent;text-align:center;transition:all 0.12s}
+  .sym.on{background:#fff0eb;border-color:#bf360c;color:#7f2800;font-weight:600}
+  .log-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .log-item{padding:10px;border:1px solid #e8e6e0;border-radius:6px;background:#fafaf8}
+  .log-item label{font-size:12px;color:#888;margin-bottom:4px}
+  .log-item input{padding:7px 9px;font-size:14px;background:#fff}
+  textarea{min-height:80px;resize:vertical;line-height:1.5}
+  .submit-btn{width:100%;padding:16px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px;letter-spacing:0.01em;transition:background 0.15s}
+  .submit-btn:hover{background:#333}
+  .submit-btn:disabled{background:#aaa;cursor:not-allowed}
+  .success{display:none;background:#e8f5e9;border:2px solid #2e7d32;border-radius:8px;padding:20px;text-align:center;margin-top:12px}
+  .success h2{color:#1b5e20;font-size:18px;margin-bottom:8px}
+  .success p{color:#2e7d32;font-size:14px;line-height:1.6}
+  .error-msg{display:none;background:#fce8e8;border:1.5px solid #c62828;border-radius:6px;padding:12px;margin-top:10px;font-size:13px;color:#7f0000}
+  .anon-box{background:#fff;border-left:3px solid #1a1a1a;padding:12px 14px;margin-bottom:12px;border-radius:0 6px 6px 0}
+  .anon-box p{font-size:13px;color:#444;line-height:1.6}
+  .anon-box strong{color:#1a1a1a}
+  .code-eg{font-family:'Courier New',monospace;background:#f0f0ec;border:1px solid #ddd;border-radius:3px;padding:1px 6px}
+  .spr-note{background:#f0f4ff;border-left:3px solid #3a5fc8;padding:10px 12px;border-radius:0 6px 6px 0;margin-bottom:10px;font-size:13px;color:#1a2a6c;line-height:1.5}
+  @media(max-width:480px){
+    .three-col{grid-template-columns:1fr 1fr}
+    .assess-row{grid-template-columns:1fr 1fr;row-gap:4px}
+    .assess-row .assess-type{grid-column:1/-1}
+    .assess-header{grid-template-columns:1fr 1fr}
+    .assess-header span:first-child{display:none}
+    .sym-grid{grid-template-columns:1fr 1fr}
+    body{padding:1rem 0.75rem}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Daily Workload &amp; Wellbeing Log</h1>
+  <p class="subtitle">Voluntary and anonymous — collected by your rep, not seen by your employer.<br>Tap <strong>Submit entry</strong> at the bottom and your response is saved instantly.</p>
+
+  <div class="anon-box">
+    <p><strong>🔒 Your personal code</strong> — first 3 letters of your mother's first name + last 2 digits of your mobile. Use the same code every day.<br>
+    <span class="code-eg">MAR72</span> &nbsp; <span class="code-eg">SUE04</span> &nbsp;&nbsp; Your name is never recorded.</p>
+  </div>
+
+  <form id="logform">
+
+    <div class="card">
+      <div class="card-title">About this entry</div>
+      <div class="two-col" style="margin-bottom:8px">
+        <div class="field"><label>Date</label><input type="date" name="entry_date" id="f-date" required></div>
+        <div class="field"><label>Your code 🔒</label><input type="text" name="anon_code" placeholder="e.g. MAR72" maxlength="8" style="font-family:'Courier New',monospace"></div>
+      </div>
+      <div class="two-col">
+        <div class="field"><label>Rostered hours</label><input type="text" name="rostered_hours" placeholder="e.g. 8:30–5:00"><div style="font-size:11px;color:#aaa;margin-top:3px">Your official contracted hours</div></div>
+        <div class="field"><label>Actual hours worked</label><input type="text" name="actual_hours" placeholder="e.g. 8:10–5:45"><div style="font-size:11px;color:#aaa;margin-top:3px">When you actually started &amp; finished</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Assessments</div>
+      <div class="assess-header">
+        <span>Type</span>
+        <span>How many</span>
+        <span>Total mins</span>
+      </div>
+      <div class="assess-row">
+        <div class="assess-type">Face-to-face<span>Including travel</span></div>
+        <input type="number" name="ftf_count" min="0" placeholder="0 if none">
+        <input type="number" name="ftf_mins" min="0" step="5" placeholder="0">
+      </div>
+      <div class="assess-row">
+        <div class="assess-type">Telehealth<span>Video or phone</span></div>
+        <input type="number" name="telehealth_count" min="0" placeholder="0 if none">
+        <input type="number" name="telehealth_mins" min="0" step="5" placeholder="0">
+      </div>
+      <div class="assess-row">
+        <div class="assess-type">Inpatient<span>Including travel</span></div>
+        <input type="number" name="inpatient_count" min="0" placeholder="0 if none">
+        <input type="number" name="inpatient_mins" min="0" step="5" placeholder="0">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">SPRs <span class="card-subtitle">— triage &amp; client contact</span></div>
+      <div class="break-row" style="border-bottom:none;padding:0">
+        <div><div class="bl">Did you have any SPRs today?</div></div>
+        <div class="togs">
+          <button type="button" class="tog yes" onclick="togSPRToday(this,'yes')">Yes</button>
+          <button type="button" class="tog no" onclick="togSPRToday(this,'no')">No</button>
+        </div>
+      </div>
+      <input type="hidden" name="spr_today" id="spr_today" value="">
+      <div class="it-extra" id="spr-portal-extra">
+        <div class="field" style="margin-top:8px"><label>How many SPRs are left unactioned in the portal?</label><input type="number" name="spr_portal_unactioned" min="0" placeholder="0"></div>
+      </div>
+      <div class="it-extra" id="spr-detail">
+        <div class="two-col" style="margin-bottom:12px;margin-top:0">
+          <div class="field"><label>Number of SPRs triaged</label><input type="number" name="spr_count" min="0" placeholder="0"></div>
+          <div class="field"><label>Total time incl. client contact (mins)</label><input type="number" name="spr_mins" min="0" step="5" placeholder="0"></div>
+        </div>
+        <div class="break-row">
+          <div><div class="bl">Did any SPRs require multiple contact attempts?</div><div class="bs">Unanswered calls, callbacks, repeated outreach</div></div>
+          <div class="togs">
+            <button type="button" class="tog yes" onclick="tog(this,'spr_multi_contact')">Yes</button>
+            <button type="button" class="tog no" onclick="tog(this,'spr_multi_contact')">No</button>
+          </div>
+        </div>
+        <input type="hidden" name="spr_multi_contact" id="spr_multi_contact" value="">
+        <div class="break-row" style="border-bottom:none;padding-bottom:0">
+          <div><div class="bl">Were you able to action all your SPRs today?</div><div class="bs">Did any remain unactioned at end of shift?</div></div>
+          <div class="togs">
+            <button type="button" class="tog yes" onclick="togSPRActioned(this,'yes')">Yes</button>
+            <button type="button" class="tog no" onclick="togSPRActioned(this,'no')">No</button>
+          </div>
+        </div>
+        <input type="hidden" name="spr_all_actioned" id="spr_all_actioned" value="">
+        <div class="it-extra" id="spr-unactioned-extra">
+          <div class="field" style="margin-top:8px"><label>How many SPRs were left unactioned?</label><input type="number" name="spr_unactioned" min="0" placeholder="0"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">IT &amp; Phone Issues</div>
+      <div class="break-row" style="border-bottom:none;padding:0 0 10px 0">
+        <div><div class="bl">Did IT or phone issues impact your work today?</div><div class="bs">Outages, dropped calls, slow software</div></div>
+        <div class="togs">
+          <button type="button" class="tog yes" onclick="tog(this,'it')">Yes</button>
+          <button type="button" class="tog no" onclick="tog(this,'it')">No</button>
+        </div>
+      </div>
+      <input type="hidden" name="it_impact" id="it_impact" value="">
+      <div class="it-extra" id="it-extra">
+        <label>Approximate time lost</label>
+        <div class="chips" id="it-chips">
+          <button type="button" class="chip" onclick="chipSel(this,'it_delay')">Under 15 min</button>
+          <button type="button" class="chip" onclick="chipSel(this,'it_delay')">15–30 min</button>
+          <button type="button" class="chip" onclick="chipSel(this,'it_delay')">30–60 min</button>
+          <button type="button" class="chip" onclick="chipSel(this,'it_delay')">1–2 hrs</button>
+          <button type="button" class="chip" onclick="chipSel(this,'it_delay')">2+ hrs</button>
+          <button type="button" class="chip" onclick="chipSel(this,'it_delay')">Half day+</button>
+        </div>
+        <input type="hidden" name="it_delay" id="it_delay" value="">
+        <div class="field" style="margin-top:10px"><label>Brief description</label><input type="text" name="it_description" placeholder="e.g. Portal down, calls dropping"></div>
+      </div>
+      <div class="break-row" style="border-bottom:none;padding:10px 0 0 0">
+        <div><div class="bl">Did you experience audio/video quality issues during a telehealth assessment?</div><div class="bs">Impacts clinical quality and client experience</div></div>
+        <div class="togs">
+          <button type="button" class="tog yes" onclick="tog(this,'telehealth_tech_issues')">Yes</button>
+          <button type="button" class="tog no" onclick="tog(this,'telehealth_tech_issues')">No</button>
+        </div>
+      </div>
+      <input type="hidden" name="telehealth_tech_issues" id="telehealth_tech_issues" value="">
+    </div>
+
+    <div class="card">
+      <div class="card-title">Breaks Taken</div>
+      <input type="hidden" name="break_morning" id="break_morning" value="">
+      <input type="hidden" name="break_lunch" id="break_lunch" value="">
+      <input type="hidden" name="break_afternoon" id="break_afternoon" value="">
+      <div class="break-row">
+        <div><div class="bl">Morning tea break</div><div class="bs">Entitled: 10 minutes</div></div>
+        <div class="togs">
+          <button type="button" class="tog yes" onclick="tog(this,'break_morning')">Yes</button>
+          <button type="button" class="tog partial" onclick="tog(this,'break_morning')">Partial</button>
+          <button type="button" class="tog no" onclick="tog(this,'break_morning')">No</button>
+        </div>
+      </div>
+      <div class="break-row">
+        <div><div class="bl">Lunch break</div><div class="bs">Entitled: 30 minutes</div></div>
+        <div class="togs">
+          <button type="button" class="tog yes" onclick="tog(this,'break_lunch')">Yes</button>
+          <button type="button" class="tog partial" onclick="tog(this,'break_lunch')">Partial</button>
+          <button type="button" class="tog no" onclick="tog(this,'break_lunch')">No</button>
+        </div>
+      </div>
+      <div class="break-row">
+        <div><div class="bl">Afternoon tea break</div><div class="bs">Entitled: 10 minutes</div></div>
+        <div class="togs">
+          <button type="button" class="tog yes" onclick="tog(this,'break_afternoon')">Yes</button>
+          <button type="button" class="tog partial" onclick="tog(this,'break_afternoon')">Partial</button>
+          <button type="button" class="tog no" onclick="tog(this,'break_afternoon')">No</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Other Time (mins)</div>
+      <div class="log-grid">
+        <div class="log-item"><label>Report writing</label><input type="number" name="time_reports" min="0" step="5" placeholder="0"></div>
+        <div class="log-item"><label>Phone calls — general</label><input type="number" name="time_calls" min="0" step="5" placeholder="0"></div>
+        <div class="log-item"><label>Case conferences</label><input type="number" name="time_conferences" min="0" step="5" placeholder="0"></div>
+        <div class="log-item"><label>Team meetings</label><input type="number" name="time_meetings" min="0" step="5" placeholder="0"></div>
+        <div class="log-item"><label>Total admin time (mins)</label><input type="number" name="time_admin" min="0" step="5" placeholder="0"></div>
+        <div class="log-item"><label>Travel (non-assessment)</label><input type="number" name="time_travel_other" min="0" step="5" placeholder="0"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Admin Tasks Completed Today <span class="card-subtitle">— tick all that apply</span></div>
+      <div class="sym-grid" id="admin-tasks">
+        <div class="sym" onclick="adminTog(this)">Matching &amp; referring</div>
+        <div class="sym" onclick="adminTog(this)">Generating referral codes</div>
+        <div class="sym" onclick="adminTog(this)">Delegation letters</div>
+        <div class="sym" onclick="adminTog(this)">Consent forms</div>
+        <div class="sym" onclick="adminTog(this)">Support plan letters</div>
+        <div class="sym" onclick="adminTog(this)">ATHM forms</div>
+        <div class="sym" onclick="adminTog(this)">HV risk screens</div>
+        <div class="sym" onclick="adminTog(this)">Printing &amp; sending letters</div>
+        <div class="sym" onclick="adminTog(this)">Updating availabilities</div>
+        <div class="sym" onclick="adminTog(this)">PAV referrals</div>
+        <div class="sym" onclick="adminTog(this)">Carefinder referrals</div>
+        <div class="sym" onclick="adminTog(this)">Other referrals (see notes)</div>
+      </div>
+      <input type="hidden" name="admin_tasks" id="admin_tasks" value="">
+    </div>
+
+    <div class="card">
+      <div class="card-title">Delegation <span class="card-subtitle">— delegates only</span></div>
+      <div class="break-row" style="border-bottom:none;padding:0">
+        <div><div class="bl">Are you a delegate?</div><div class="bs">Complete this section only if you have a delegate role</div></div>
+        <div class="togs">
+          <button type="button" class="tog yes" onclick="togDelegate(this,'yes')">Yes</button>
+          <button type="button" class="tog no" onclick="togDelegate(this,'no')">No</button>
+        </div>
+      </div>
+      <input type="hidden" name="is_delegate" id="is_delegate" value="">
+      <div class="it-extra" id="delegate-extra">
+        <div class="two-col" style="margin-top:0">
+          <div class="field"><label>Time spent on delegation today (mins)</label><input type="number" name="delegation_mins" min="0" step="5" placeholder="0"></div>
+          <div class="field"><label>Number of assessments delegated</label><input type="number" name="delegation_count" min="0" placeholder="0"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Overtime</div>
+      <div class="break-row" style="border-bottom:none;padding:0">
+        <div><div class="bl">Worked outside rostered hours?</div><div class="bs">Before start or after finish time</div></div>
+        <div class="togs">
+          <button type="button" class="tog yes" onclick="togOvertime(this,'yes')">Yes</button>
+          <button type="button" class="tog no" onclick="togOvertime(this,'no')">No</button>
+        </div>
+      </div>
+      <input type="hidden" name="overtime" id="overtime" value="">
+      <div class="it-extra" id="overtime-extra">
+        <div class="field" style="margin-top:0"><label>How long did you work outside rostered hours? (mins)</label><input type="number" name="overtime_mins" min="0" step="5" placeholder="0"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Stress Level Today</div>
+      <div class="stress-row">
+        <span class="stress-lbl" style="text-align:right">Low</span>
+        <div class="snums">
+          <button type="button" class="snum s1" onclick="stressSel(1)">1</button>
+          <button type="button" class="snum s2" onclick="stressSel(2)">2</button>
+          <button type="button" class="snum s3" onclick="stressSel(3)">3</button>
+          <button type="button" class="snum s4" onclick="stressSel(4)">4</button>
+          <button type="button" class="snum s5" onclick="stressSel(5)">5</button>
+        </div>
+        <span class="stress-lbl">High</span>
+        <span class="stress-word" id="stress-word"></span>
+      </div>
+      <input type="hidden" name="stress_level" id="stress_level" value="">
+    </div>
+
+    <div class="card">
+      <div class="card-title">OHS / Physical Symptoms Today</div>
+      <div class="sym-grid" id="sym-grid">
+        <div class="sym" onclick="symTog(this)">Neck pain</div>
+        <div class="sym" onclick="symTog(this)">Wrist / arm pain</div>
+        <div class="sym" onclick="symTog(this)">Back pain</div>
+        <div class="sym" onclick="symTog(this)">Eye strain / headache</div>
+        <div class="sym" onclick="symTog(this)">Fatigue / exhaustion</div>
+        <div class="sym" onclick="symTog(this)">Anxiety / distress</div>
+        <div class="sym" onclick="symTog(this)">None</div>
+        <div class="sym" onclick="symTog(this)">Other (see notes)</div>
+      </div>
+      <input type="hidden" name="symptoms" id="symptoms" value="">
+    </div>
+
+    <div class="card">
+      <div class="card-title">Additional Notes</div>
+      <textarea name="notes" placeholder="Any other workload concerns, incidents, or observations…"></textarea>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submit-btn">✓ Submit entry — save my response</button>
+    <div class="error-msg" id="error-msg">Something went wrong. Please check your connection and try again.</div>
+
+  </form>
+
+  <div class="success" id="success">
+    <h2>✓ Entry saved!</h2>
+    <p>Your response has been recorded securely.<br>Thank you for taking the time to fill this in.<br><br>
+    <button onclick="resetForm()" style="padding:10px 24px;background:#1a1a1a;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer">Fill in another day</button></p>
+  </div>
+
+</div>
+<script>
+  document.getElementById('f-date').valueAsDate = new Date();
+
+  function togSPRToday(btn, val) {
+    btn.closest('.togs').querySelectorAll('.tog').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('spr_today').value = val === 'yes' ? 'Yes' : 'No';
+    document.getElementById('spr-detail').className = 'it-extra' + (val === 'yes' ? ' show' : '');
+    document.getElementById('spr-portal-extra').className = 'it-extra' + (val === 'no' ? ' show' : '');
+    document.getElementById('spr-unactioned-extra').className = 'it-extra';
+  }
+
+  function togSPRActioned(btn, val) {
+    btn.closest('.togs').querySelectorAll('.tog').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('spr_all_actioned').value = val === 'yes' ? 'Yes' : 'No';
+    document.getElementById('spr-unactioned-extra').className = 'it-extra' + (val === 'no' ? ' show' : '');
+  }
+
+  function adminTog(el) {
+    el.classList.toggle('on');
+    const selected = [...document.querySelectorAll('#admin-tasks .sym.on')].map(s => s.textContent).join(', ');
+    document.getElementById('admin_tasks').value = selected;
+  }
+
+  function togDelegate(btn, val) {
+    btn.closest('.togs').querySelectorAll('.tog').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('is_delegate').value = val === 'yes' ? 'Yes' : 'No';
+    document.getElementById('delegate-extra').className = 'it-extra' + (val === 'yes' ? ' show' : '');
+  }
+
+  function togOvertime(btn, val) {
+    btn.closest('.togs').querySelectorAll('.tog').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('overtime').value = val === 'yes' ? 'Yes' : 'No';
+    document.getElementById('overtime-extra').className = 'it-extra' + (val === 'yes' ? ' show' : '');
+  }
+
+
+
+  function tog(btn, field) {
+    btn.closest('.togs').querySelectorAll('.tog').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    if (field === 'it') {
+      document.getElementById('it_impact').value = btn.textContent.trim();
+      document.getElementById('it-extra').className = 'it-extra' + (btn.classList.contains('yes') ? ' show' : '');
+    } else {
+      const el = document.getElementById(field);
+      if (el) el.value = btn.textContent.trim();
+    }
+  }
+
+  function chipSel(btn, field) {
+    btn.closest('.chips').querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById(field).value = btn.textContent.trim();
+  }
+
+  function stressSel(n) {
+    document.querySelectorAll('.snum').forEach(b => b.classList.remove('on'));
+    document.querySelector('.s' + n).classList.add('on');
+    const words = ['','Low','Somewhat low','Moderate','High','Very high'];
+    document.getElementById('stress-word').textContent = '— ' + words[n];
+    document.getElementById('stress_level').value = n + ' - ' + words[n];
+  }
+
+  function symTog(el) {
+    el.classList.toggle('on');
+    const selected = [...document.querySelectorAll('#sym-grid .sym.on')].map(s => s.textContent).join(', ');
+    document.getElementById('symptoms').value = selected;
+  }
+
+  document.getElementById('logform').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    const errMsg = document.getElementById('error-msg');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    errMsg.style.display = 'none';
+
+    const data = new FormData(this);
+    const obj = {};
+    data.forEach((v, k) => obj[k] = v);
+
+    try {
+      const res = await fetch('https://submit-form.com/9dDAGbr2w', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+        body: JSON.stringify(obj)
+      });
+      if (res.ok) {
+        document.getElementById('logform').style.display = 'none';
+        document.getElementById('success').style.display = 'block';
+        window.scrollTo(0,0);
+      } else {
+        throw new Error('Failed');
+      }
+    } catch {
+      errMsg.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '✓ Submit entry — save my response';
+    }
+  });
+
+  function resetForm() {
+    document.getElementById('logform').reset();
+    document.getElementById('f-date').valueAsDate = new Date();
+    document.querySelectorAll('.tog,.snum,.sym,.chip').forEach(el => el.classList.remove('on'));
+    document.getElementById('stress-word').textContent = '';
+    document.getElementById('it-extra').className = 'it-extra';
+    document.getElementById('overtime-extra').className = 'it-extra';
+    document.getElementById('delegate-extra').className = 'it-extra';
+    document.getElementById('spr-unactioned-extra').className = 'it-extra';
+    document.getElementById('spr-detail').className = 'it-extra';
+    document.getElementById('spr-portal-extra').className = 'it-extra';
+    document.querySelectorAll('#admin-tasks .sym').forEach(el => el.classList.remove('on'));
+    document.getElementById('overtime-extra').className = 'it-extra';
+    ['it_impact','it_delay','break_morning','break_lunch','break_afternoon','overtime','stress_level','symptoms','spr_multi_contact','spr_all_actioned','telehealth_tech_issues','admin_tasks','is_delegate','spr_today'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.value = '';
+    });
+    document.getElementById('logform').style.display = 'block';
+    document.getElementById('success').style.display = 'none';
+    window.scrollTo(0,0);
+  }
+</script>
+</body>
+</html>
